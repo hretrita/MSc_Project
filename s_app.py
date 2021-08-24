@@ -1,3 +1,5 @@
+## SIMPLE AVERAGE PREDICTED PROBABILITY
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -8,7 +10,9 @@ from os import listdir
 
 # Establish variables
 files = listdir("./") # .csv files must be in the set directory
-ground_truth = pd.read_csv('./ground_truth/holdout/02_holdout.csv') # true class data is stored in a separate folder
+# true class data is stored in a separate folder
+ground_truth = pd.read_csv('./ground_truth/holdout/02_holdout.csv')
+# Reorder GT in alphabetical order for consistency with other dataframes
 ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
 tables = []
 predictions = []
@@ -39,11 +43,6 @@ final_table = final_table.sort_values(by=['Info_protein_id', 'Info_pos'])
 results = np.transpose(np.stack(tuple(predictions)))
 probs = np.transpose(np.stack(tuple(probs)))
 
-# # Scale every row of the probs table
-# probs_tmp = pd.DataFrame(probs)
-# probs_tmp.loc[:, :] = probs_tmp.loc[:, :].div(probs_tmp.sum(axis=1), axis=0)
-# probs = probs_tmp.to_numpy()
-
 # Average Predicted Probability Implementation
 divisor = probs.shape[1] # Number of predictors being used. Used to compute average
 for idx, p in enumerate(probs):
@@ -70,6 +69,6 @@ print('- Accuracy: %s' % accuracy)
 print('- MCC: %s' % mcc)
 print('- F1 score: %s' % f1)
 
-# Create final table with results
+# Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred
 final_table.to_csv('./ensemble_preds/02_HepC/holdout/s_app.csv', index=False)

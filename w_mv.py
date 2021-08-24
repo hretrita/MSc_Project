@@ -1,8 +1,7 @@
-# WEIGHTED MAJORITY VOTE
+## WEIGHTED MAJORITY VOTE
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import matthews_corrcoef
 from sklearn.metrics import f1_score
@@ -29,10 +28,11 @@ probs = []
 pred = []
 threshold = 0.5
 
-# Set the weights in the respective order of the predictors below (i.e., ABCpred, LBtope, iBCE-EL, Bepipred2)
+# Set the weights in the respective order of the predictors below (i.e., ABCpred, Bepipred2, iBCE-EL, LBtope)
 weights = [0.50,	0.50,	0.50,	0.80]
 weights_sum = sum(weights)
 
+# Scale weights
 ABCpred_weight = weights[0]/weights_sum
 Bepipred2_weight = weights[1]/weights_sum
 iBCE_EL_weight = weights[2]/weights_sum
@@ -85,6 +85,6 @@ print('- Accuracy: %s' % accuracy)
 print('- MCC: %s' % mcc)
 print('- F1 score: %s' % f1)
 
-# Create final table with results
+# Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred
-#final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)
+final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)

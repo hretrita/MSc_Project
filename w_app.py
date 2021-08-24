@@ -1,6 +1,7 @@
+## WEIGHTED AVERAGE PREDICTED PROBABILITY
+
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import matthews_corrcoef
 from sklearn.metrics import f1_score
@@ -27,10 +28,11 @@ probs = []
 pred = []
 threshold = 0.5
 
-# Set the weights in the respective order of the predictors below (i.e., ABCpred, LBtope, iBCE-EL, Bepipred2)
+# Set the weights in the respective order of the predictors below (i.e., ABCpred, Bepipred2, iBCE-EL, LBtope)
 weights = [0.50,	0.50,	0.50,	0.80]
 weights_sum = sum(weights)
 
+# Scale weights
 ABCpred_weight = weights[0]/weights_sum
 Bepipred2_weight = weights[1]/weights_sum
 iBCE_EL_weight = weights[2]/weights_sum
@@ -52,7 +54,6 @@ final_table = pd.concat([final_table, ground_truth.iloc[:,-1]], axis=1).dropna()
 final_table = final_table.iloc[:, :-1]
 final_table = final_table.sort_values(by=['Info_protein_id', 'Info_pos'])
 
-
 # Transpose matrix
 results = np.transpose(np.stack(tuple(results)))
 probs = np.transpose(np.stack(tuple(probs)))
@@ -66,7 +67,7 @@ for idx, p in enumerate(probs):
     else:
         pred.append(1)
 
-# Merge predictions with true class and remove NaN
+# Merge predictions with true class and remove Na
 pred = pd.DataFrame(pred)
 ground_truth_and_pred = pd.concat([ground_truth, pred], axis=1).dropna()
 # Split true class and predictions
@@ -83,7 +84,7 @@ print('- Accuracy: %s' % accuracy)
 print('- MCC: %s' % mcc)
 print('- F1 score: %s' % f1)
 
-# Create final table with results
+# Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred
 final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_app.csv', index=False)
 

@@ -1,14 +1,12 @@
 # Imports
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import matthews_corrcoef
 from sklearn.metrics import f1_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
-from os import listdir
 
 #Establish variables
 # ABCpred = pd.read_csv('abcpred_holdout.csv')
@@ -38,10 +36,11 @@ for table_id in range(len(tables)):
 probs = np.transpose(np.stack(tuple(probs)))
 probs = pd.DataFrame(probs)
 
-# Order files by col1 and col2
+# Order files by col1 and col2 and remove entries with no ground truth
 frames = [probs, ground_truth]
 data = pd.concat([probs, ground_truth], axis=1).dropna()
-data = data.drop(['Info_protein_id', 'Info_pos', 'Info_AA'], axis=1) # Remove unnecessary columns. Only keep probabilities and true class
+# Remove unnecessary columns. Only keep probabilities and ground truth
+data = data.drop(['Info_protein_id', 'Info_pos', 'Info_AA'], axis=1)
 
 # Separate features from label
 X, y = data.iloc[:, :-1], data.iloc[:, [-1]]
@@ -89,8 +88,7 @@ for table_id in range(len(v_tables)):
 
 # Create final table where predictions will be added to
 temp = v_ground_truth.dropna().drop(['Class'], axis=1)
-
-# Drop unnecessary cols
+# Drop unnecessary cols - keep ground truth classifications
 v_ground_truth = v_ground_truth.drop(['Info_protein_id', 'Info_pos', 'Info_AA'], axis=1)
 
 # Transpose matrix
@@ -114,6 +112,6 @@ print('- MCC: %s' % validation_mcc)
 print('- F1 score: %s' % validation_f1)
 print('=================================')
 
-
+# Concatenate predictions to temp and export csv file ready to run gather_results in R
 temp['pred'] = pred.iloc[:,0]
 temp.to_csv('./ensemble_preds/01_EBV/toh_rf_stacking.csv', index=False)

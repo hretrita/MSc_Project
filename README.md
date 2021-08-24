@@ -35,12 +35,12 @@ Ensemble Methods
 
 1. All file paths entered manually into their respective variables (Lines 12-24; Lines 66-78)
 2. Comment/uncomment variables to accommodate your desired prediction (Lines 12-24; Lines 66-78)
-3. 3. Enter path to where the final prediction** will be saved (line 117)
+3. Enter path to where the final prediction** will be saved (line 117)
 
 ** All final predictions are saved into a table containing the columns:
-    Info_protein_id
-    Info_pos
-necessary for the gather_results function in R
+    [Info_protein_id],
+    [Info_pos] 
+ necessary for the gather_results function in R
 
 
 

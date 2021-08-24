@@ -4,9 +4,9 @@ Ensemble Methods
 ## s_mv.py (Simple Majority Vote) & s_app.py (Simple Average Predicted Probability)
 
 1. The program will automatically grab any .csv files in the directory so only all necessary files for a given run should be in there
-    e.g., ABCpred outputs for EBV training
-          Bepipred2 outputs for EBV training
-          iBCE-EL outputs for EBV training
+    e.g., ABCpred outputs for EBV training,
+          Bepipred2 outputs for EBV training,
+          iBCE-EL outputs for EBV training,
           LBtope outputs for EBV training
 2. Ground truth file needs to be in a separate folder and it's path entered manually to into line 13.
 3. Enter path to where the final prediction* will be saved (line 81)
@@ -19,17 +19,17 @@ Ensemble Methods
 
 ## WEIGHTS
 
-EBV - Training        [0.50,	0.51,	0.49,	0.54]
-EBV - holdout         [0.50,	0.51,	0.51,	0.54]
+- EBV - Training        [0.50,	0.51,	0.49,	0.54]
+- EBV - holdout         [0.50,	0.51,	0.51,	0.54]
 
-HepC - Training       [0.56,	0.56,	0.44,	0.71]
-HepC - holdout        [0.37,	0.61,	0.63,	0.73]
+- HepC - Training       [0.56,	0.56,	0.44,	0.71]
+- HepC - holdout        [0.37,	0.61,	0.63,	0.73]
 
-Ovolvulus - Training  [0.41,	0.55,	0.59,	0.55]
-Ovolvulus - holdout   [0.45,	0.54,	0.55,	0.55]
+- Ovolvulus - Training  [0.41,	0.55,	0.59,	0.55]
+- Ovolvulus - holdout   [0.45,	0.54,	0.55,	0.55]
 
-Spyogenes - Training  [0.60,	0.53,	0.41,	0.53]
-Spyogenes - holdout   [0.50,	0.50,	0.50,	0.80]
+- Spyogenes - Training  [0.60,	0.53,	0.41,	0.53]
+- Spyogenes - holdout   [0.50,	0.50,	0.50,	0.80]
 
 ## stacking.py (Stacking)
 

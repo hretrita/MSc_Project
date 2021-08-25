@@ -13,6 +13,7 @@ iBCE_EL = pd.read_csv('ibceel_holdout.csv')
 Bepipred2 = pd.read_csv('bepipred2_holdout.csv')
 ground_truth = pd.read_csv('./ground_truth/holdout/02_holdout.csv')
 ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
+ground_truth = ground_truth.reset_index()
 
 # ABCpred = pd.read_csv('abcpred_training.csv')
 # LBtope = pd.read_csv('lbtope_training.csv')
@@ -20,6 +21,7 @@ ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
 # Bepipred2 = pd.read_csv('bepipred2_training.csv')
 # ground_truth = pd.read_csv('./ground_truth/training/01_training.csv')
 # ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
+# ground_truth = ground_truth.reset_index()
 
 # Make a list for the datasets
 tables = []
@@ -50,10 +52,9 @@ for table in raw_models.values():
     final_table = processed_table.iloc[:, 0:2]  # Add cols Info_protein_id and Info_pos
 
 # Concatenate final_table to ground_truth, remove NAs and drop ground_truth column
-final_table = pd.concat([final_table, ground_truth.iloc[:,-1]], axis=1).dropna()
+final_table = pd.concat([final_table, ground_truth.iloc[:, -1]], axis=1) #.dropna()
+final_table = final_table.dropna()
 final_table = final_table.iloc[:, :-1]
-final_table = final_table.sort_values(by=['Info_protein_id', 'Info_pos'])
-
 
 # Transpose matrix
 results = np.transpose(np.stack(tuple(results)))
@@ -87,4 +88,5 @@ print('- F1 score: %s' % f1)
 
 # Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred
-final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)
+print(final_table)
+#final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)

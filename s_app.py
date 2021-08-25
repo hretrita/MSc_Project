@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import matthews_corrcoef
 from sklearn.metrics import f1_score
@@ -14,6 +13,8 @@ files = listdir("./") # .csv files must be in the set directory
 ground_truth = pd.read_csv('./ground_truth/holdout/02_holdout.csv')
 # Reorder GT in alphabetical order for consistency with other dataframes
 ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
+ground_truth = ground_truth.reset_index()
+
 tables = []
 predictions = []
 probs = []
@@ -35,9 +36,9 @@ for table_id in range(len(tables)):
     final_table = tables[table_id].iloc[:, 0:2]  # Add cols Info_UID and Info_center_pos
 
 # Concatenate final_table to ground_truth, remove NAs and drop ground_truth column
-final_table = pd.concat([final_table, ground_truth.iloc[:,-1]], axis=1).dropna()
+final_table = pd.concat([final_table, ground_truth.iloc[:, -1]], axis=1) #.dropna()
+final_table = final_table.dropna()
 final_table = final_table.iloc[:, :-1]
-final_table = final_table.sort_values(by=['Info_protein_id', 'Info_pos'])
 
 # Transpose matrix
 results = np.transpose(np.stack(tuple(predictions)))

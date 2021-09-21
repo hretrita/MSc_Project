@@ -53,10 +53,16 @@ for row in df.iterrows():
             section = 1
             df.loc[row[0], 'section'] = f'{protein}:{section}'
 
-        # After evaluating the current protein, reassign the "last_" variables
-        last_protein = protein
-        last_position = position
-        prev_gt = gt
+    #
+    else:
+        if protein == last_protein or last_protein == 'no_protein':
+            section += 1
+            df.loc[row[0], 'section'] = f'{protein}:{section}'
+
+    # After evaluating the current protein, reassign the "last_" variables
+    last_protein = protein
+    last_position = position
+    prev_gt = gt
 
 # The groupby you want to do
 desired_output = (
@@ -67,5 +73,5 @@ desired_output = (
 )
 
 print(df)
-# av = (df.groupby('section')[[0, 1]].mean()) # compute av prob
-# print(av)
+av = (df.groupby('section')[[0, 1]].mean()) # compute av prob
+print(av)

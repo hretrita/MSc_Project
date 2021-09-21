@@ -14,6 +14,7 @@ Bepipred2 = pd.read_csv('bepipred2_holdout.csv')
 ground_truth = pd.read_csv('./ground_truth/holdout/02_holdout.csv')
 ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
 ground_truth = ground_truth.reset_index()
+ground_truth = ground_truth.drop(['index'], axis=1)
 
 # ABCpred = pd.read_csv('abcpred_training.csv')
 # LBtope = pd.read_csv('lbtope_training.csv')
@@ -22,6 +23,8 @@ ground_truth = ground_truth.reset_index()
 # ground_truth = pd.read_csv('./ground_truth/training/01_training.csv')
 # ground_truth = ground_truth.sort_values(by=['Info_protein_id', 'Info_pos'])
 # ground_truth = ground_truth.reset_index()
+# ground_truth = ground_truth.drop(['index'], axis=1)
+
 
 # Make a list for the datasets
 tables = []
@@ -31,7 +34,7 @@ pred = []
 threshold = 0.5
 
 # Set the weights in the respective order of the predictors below (i.e., ABCpred, Bepipred2, iBCE-EL, LBtope)
-weights = [0.50,	0.50,	0.50,	0.80]
+weights = [0.41, 0.55, 0.59, 0.55]
 weights_sum = sum(weights)
 
 # Scale weights
@@ -49,9 +52,11 @@ for table in raw_models.values():
     processed_table = table[0].sort_values(by=['Info_protein_id', 'Info_pos'])
     results.append(processed_table.iloc[:, -1].values * table[1])
     probs.append(processed_table.iloc[:, -2].values)
-    final_table = processed_table.iloc[:, 0:2]  # Add cols Info_protein_id and Info_pos
+    final_table = processed_table.iloc[:, 0:3]  # Add cols Info_protein_id and Info_pos
 
 # Concatenate final_table to ground_truth, remove NAs and drop ground_truth column
+final_table = final_table.reset_index()
+final_table = final_table.drop(['index'], axis=1)
 final_table = pd.concat([final_table, ground_truth.iloc[:, -1]], axis=1) #.dropna()
 final_table = final_table.dropna()
 final_table = final_table.iloc[:, :-1]
@@ -70,7 +75,10 @@ for idx, r in enumerate(results):
 
 # Merge predictions with true class and remove NaN
 pred = pd.DataFrame(pred)
-ground_truth_and_pred = pd.concat([ground_truth, pred], axis=1).dropna()
+pred = pred.reset_index()
+pred = pred.drop(['index'], axis=1)
+ground_truth_and_pred = pd.concat([ground_truth, pred], axis=1)
+ground_truth_and_pred = ground_truth_and_pred.dropna()
 
 # Split true class and predictions
 pred = ground_truth_and_pred.iloc[:, -1]
@@ -88,5 +96,4 @@ print('- F1 score: %s' % f1)
 
 # Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred
-print(final_table)
-#final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)
+final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)

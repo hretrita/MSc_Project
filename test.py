@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
 
-d = {'Info_protein_ID': ['Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 2', 'Protein 2'],
-     'Info_pos_AA': [22, 23, 24, 25, 26, 34, 35, 36, 37, 38, 45, 46],
-     0: [0.4, 0.3, 0.7, 0.6, 0.4, 0.2, 0.6, 0.7, 0.8, 0.7, 0.7, 0.2],
-     1: [0.5, 0.7, 0.8, 0.9, 0.9, 0.1, 0.6, 0.5, 0.7, 0.5, 0.4, 0.4],
-     'Class': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1, 1]
+d = {'Info_protein_ID': ['Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 1', 'Protein 2', 'Protein 2', 'Protein 2', 'Protein 2', 'Protein 2', 'Protein 2', 'Protein 2', 'Protein 2'],
+     'Info_pos_AA': [22, 23, 24, 25, 26, 34, 35, 36, 37, 38, 45, 46, 47, 48, 49, 55, 56, 57],
+     0: [0.4, 0.3, 0.7, 0.6, 0.4, 0.2, 0.6, 0.7, 0.8, 0.7, 0.7, 0.2, 0.6, 0.7, 0.8, 0.7, 0.7, 0.2],
+     1: [0.5, 0.7, 0.8, 0.9, 0.9, 0.1, 0.6, 0.5, 0.7, 0.5, 0.4, 0.4, 0.8, 0.9, 0.9, 0.1, 0.6, 0.5],
+     'Class': [1, 1, 1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, 1, 1, 1]
      }
 df = pd.DataFrame(data=d)
 
@@ -45,7 +45,7 @@ for row in df.iterrows():
 
             # If not, Increase the section variable, and then insert the section label
             else:
-                section += 1
+                section += 2
                 df.loc[row[0], 'section'] = f'{protein}:{section}'
 
         # If the current protein is a new protein, restart the section naming
@@ -56,8 +56,12 @@ for row in df.iterrows():
     #
     else:
         if protein == last_protein or last_protein == 'no_protein':
-            section += 1
-            df.loc[row[0], 'section'] = f'{protein}:{section}'
+            if position == last_position + 1 or last_position == -1:
+                section += 1
+                df.loc[row[0], 'section'] = f'{protein}:{section}'
+            else:
+                section += 2
+                df.loc[row[0], 'section'] = f'{protein}:{section}'
 
     # After evaluating the current protein, reassign the "last_" variables
     last_protein = protein

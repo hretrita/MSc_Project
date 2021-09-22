@@ -19,13 +19,13 @@ df = (df
       )
 
 # Populate a new column called "section"
-df['section'] = None
+df['Info_PepID'] = None
 
 # Populate the necessaryvariables
 last_protein = 'no_protein'
 last_position = -1
 prev_gt = 'no_class'
-section = 1
+Info_PepID = 1
 
 # Iterate over each row using iterrows
 for row in df.iterrows():
@@ -41,27 +41,27 @@ for row in df.iterrows():
 
             # Check if the current position is a continuation of the last position, if so insert the section label as-is
             if position == last_position + 1 or last_position == -1:
-                df.loc[row[0], 'section'] = f'{protein}:{section}'
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
 
             # If not, Increase the section variable, and then insert the section label
             else:
-                section += 2
-                df.loc[row[0], 'section'] = f'{protein}:{section}'
+                Info_PepID += 2
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
 
         # If the current protein is a new protein, restart the section naming
         else:
-            section = 1
-            df.loc[row[0], 'section'] = f'{protein}:{section}'
+            Info_PepID = 1
+            df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
 
     #
     else:
         if protein == last_protein or last_protein == 'no_protein':
             if position == last_position + 1 or last_position == -1:
-                section += 1
-                df.loc[row[0], 'section'] = f'{protein}:{section}'
+                Info_PepID += 1
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
             else:
-                section += 2
-                df.loc[row[0], 'section'] = f'{protein}:{section}'
+                Info_PepID += 2
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
 
     # After evaluating the current protein, reassign the "last_" variables
     last_protein = protein
@@ -70,12 +70,12 @@ for row in df.iterrows():
 
 # The groupby you want to do
 desired_output = (
-    df[['section', 0, 1]]
-        .groupby('section')
+    df[['Info_PepID', 0, 1]]
+        .groupby('Info_PepID')
         .mean()
         .reset_index()
 )
 
 print(df)
-av = (df.groupby('section')[[0, 1]].mean()) # compute av prob
+av = (df.groupby('Info_PepID')[[0, 1]].mean()) # compute av prob
 print(av)

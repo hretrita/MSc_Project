@@ -103,6 +103,9 @@ for table_id in range(len(v_tables)):
 # Create final table where predictions will be added to
 temp = v_ground_truth.dropna().drop(['Class'], axis=1)
 
+# Data for AUC
+pep_data = v_ground_truth.dropna()
+
 # Drop unnecessary cols - keep ground truth classifications
 v_ground_truth_tmp = v_ground_truth.drop(['Info_pos', 'Info_AA'], axis=1)
 v_ground_truth = v_ground_truth.drop(['Info_protein_id', 'Info_pos', 'Info_AA'], axis=1)
@@ -143,25 +146,189 @@ data = data.dropna()
 v_probs = data.iloc[:, :-1]
 v_ground_truth = data.iloc[:, -1]
 
-###############################################################
+########################## AUC ##########################
 
 # Import df produced by gather_results() function in R
-GT_pep = ()
+pep_lvl = pd.read_csv('./res_files/01_EBV/stacking/01_EBV_toh_rf.csv')
+pep_gt = pep_lvl.filter(['Class'], axis=1) # ground truth at peptide level
+pep_pred = pep_lvl.filter(['Pred'], axis=1) # prediction at peptide level
 
-# Compute average probability per peptide per classifier
-AUC_data = pd.concat([v_ground_truth_tmp, v_probs], axis = 1) # concat w/ GT and remove NAs
-AUC_data = AUC_data.dropna() # Remove NA tuples
-AUC_data = AUC_data.drop(["Class"], axis = 1) # Drop ground truth data
+# Rename for algorithm
+df = pd.concat([pep_data, v_probs], axis= 1)
 
-AUC_av = (AUC_data.groupby('Info_protein_id')[[0, 1, 2, 3]].mean()) # compute av prob
-print(AUC_av)
-AUC_feat = AUC_av.reset_index() # add an index to the df
-AUC_feat = AUC_feat.iloc[:,1:] # remove the first column with protein names
-print(AUC_feat)
+print(df)
 
-# ROC curve
-# metrics.plot_roc_curve(rf, v_probs, v_ground_truth, ax=ax)
-# metrics.plot_roc_curve(svm, v_probs, v_ground_truth, ax=ax)
-# metrics.plot_roc_curve(lr, v_probs, v_ground_truth, ax=ax)
-# plt.show()
-# #exit()
+
+# Algorithm
+df = (df
+      # Sort the values so everything is in order of protein and position
+      .sort_values(['Info_protein_id', 'Info_pos'], ascending=True)
+
+      # reset the index (just to keep things clean)
+      .reset_index(drop=True)
+      )
+
+# Populate a new column called "section"
+df['Info_PepID'] = None
+
+# Populate the variables we'll need
+last_protein = 'no_protein'
+last_position = -1
+Info_PepID = 1
+last_class = -999
+
+# Iterate over each row quickly using iterrows
+for row in df.iterrows():
+    protein = row[1]['Info_protein_id']
+    position = row[1]['Info_pos']
+    current_class = row[1]['Class']
+
+    # If the current protein and last protein match, update the section label of the dataframe
+    if protein == last_protein or last_protein == 'no_protein':
+
+        # Check if the current position is a continuation of the last position, if so insert the section label as-is
+        if position == last_position + 1 or last_position == -1:
+
+            if last_class == current_class or last_class == -999:
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+
+            elif last_class == -1 and current_class == -1:
+                    Info_PepID = Info_PepID
+                    df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+            else:
+                Info_PepID += 1
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+
+        # If not, Increase the section variable, and then insert the section label
+        else:
+            if last_class == -1 and current_class == -1:
+                Info_PepID = Info_PepID
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+            else:
+                Info_PepID += 2
+                df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+
+
+    # If the current protein is a new protein, restart the section naming
+    else:
+        if position != 1:
+            Info_PepID = 2
+            df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+
+        else:
+            Info_PepID = 1
+            df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+
+    # After evaluating the current protein, reassign the "last_" variables
+    last_protein = protein
+    last_position = position
+    last_class = current_class
+
+# The groupby you want to do
+output = (
+    df[['Info_PepID', 0, 1, 2, 3]]
+        .groupby('Info_PepID')
+        .mean()
+        .reset_index()
+)
+print(output.to_string())
+
+# # Algorithm
+# df = (df
+#       # Sort the values so everything is in order of protein and position
+#       .sort_values(['Info_protein_id', 'Info_pos'], ascending=True)
+#
+#       # reset the index (just to keep things clean)
+#       .reset_index(drop=True)
+#       )
+#
+# # Populate a new column called "section"
+# df['Info_PepID'] = None
+#
+# # Populate the necessary variables
+# last_protein = 'no_protein'
+# last_position = -1
+# prev_gt = 'no_class'
+# Info_PepID = 1
+#
+# # Iterate over each row using iterrows
+# for row in df.iterrows():
+#     protein = row[1]['Info_protein_id']
+#     position = row[1]['Info_pos']
+#     gt = row[1]['Class']
+#
+#     # If the current Class matches the different class
+#     if gt == prev_gt or prev_gt == 'no_class':
+#
+#         # If the current protein and last protein match, update the section label of the dataframe
+#         if protein == last_protein or last_protein == 'no_protein':
+#
+#             # Check if the current position is a continuation of the last position, if so insert the section label as-is
+#             if position == last_position + 1 or last_position == -1:
+#                 df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+#
+#             # If not, increase the section variable, and then insert the section label
+#             else:
+#                 Info_PepID += 2
+#                 df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+#
+#         # If the current protein is a new protein, restart the section naming
+#         else:
+#             Info_PepID = 1
+#             df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+#
+#     # If class changes in the next AA
+#     else:
+#
+#         # If the current protein and last protein match, update the section label of the dataframe
+#         if protein == last_protein or last_protein == 'no_protein':
+#
+#             # Check if the current position is a continuation of the last position, if so insert the section label as-is
+#             if position == last_position + 1 or last_position == -1:
+#                 Info_PepID += 1
+#                 df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+#
+#             # If not, increase the section variable, and then insert the section label
+#             else:
+#                 Info_PepID += 2
+#                 df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+#         else:
+#             Info_PepID = 1
+#             df.loc[row[0], 'Info_PepID'] = f'{protein}:{Info_PepID}'
+#
+#     # After evaluating the current protein, reassign the "last_" variables
+#     last_protein = protein
+#     last_position = position
+#     prev_gt = gt
+#
+# # The groupby you want to do
+# output = (
+#     df[['Info_PepID', 0, 1, 2, 3]]
+#         .groupby('Info_PepID')
+#         .mean()
+#         .reset_index()
+# )
+
+# print(output.to_string())
+
+# # Compute average probability per peptide per classifier
+# AUC_data = pd.concat([v_ground_truth_tmp, v_probs], axis = 1) # concat w/ GT and remove NAs
+# AUC_data = AUC_data.dropna() # Remove NA tuples
+#
+#
+#
+#
+# AUC_data = AUC_data.drop(["Class"], axis = 1) # Drop ground truth data
+#
+# AUC_av = (AUC_data.groupby('Info_protein_id')[[0, 1, 2, 3]].mean()) # compute av prob
+# print(AUC_av)
+# AUC_feat = AUC_av.reset_index() # add an index to the df
+# AUC_feat = AUC_feat.iloc[:,1:] # remove the first column with protein names
+# print(AUC_feat)
+#
+# # ROC curve
+# # metrics.plot_roc_curve(rf, v_probs, v_ground_truth, ax=ax)
+# # metrics.plot_roc_curve(svm, v_probs, v_ground_truth, ax=ax)
+# # metrics.plot_roc_curve(lr, v_probs, v_ground_truth, ax=ax)
+# # plt.show()
+# # #exit()

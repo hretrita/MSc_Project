@@ -68,10 +68,10 @@ probs = np.transpose(np.stack(tuple(probs)))
 # Classification
 for idx, r in enumerate(results):
     sum = r.sum() # Sum of the row
-    if sum < 0:
-        pred.append(-1)
-    else:
+    if sum > 0:
         pred.append(1)
+    else:
+        pred.append(-1)
 
 # Merge predictions with true class and remove NaN
 pred = pd.DataFrame(pred)

@@ -53,10 +53,10 @@ probs = np.transpose(np.stack(tuple(probs)))
 divisor = probs.shape[1] # Number of predictors being used. Used to compute average
 for idx, p in enumerate(probs):
     sum = p.sum()
-    if sum/divisor > threshold:
-        pred.append(1)
-    else:
+    if sum/divisor < threshold:
         pred.append(-1)
+    else:
+        pred.append(1)
 
 #Merge predictions with ground_truth and remove NA
 pred = pd.DataFrame(pred)

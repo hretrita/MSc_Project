@@ -1,12 +1,9 @@
-## WEIGHTED MAJORITY VOTE
+## WEIGHTED CLASS VOTE
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import matthews_corrcoef
-from sklearn.metrics import f1_score
 
-# Import files
+# Import files and establish variables
 ABCpred = pd.read_csv('abcpred_holdout.csv')
 LBtope = pd.read_csv('lbtope_holdout.csv')
 iBCE_EL = pd.read_csv('ibceel_holdout.csv')
@@ -25,8 +22,6 @@ ground_truth = ground_truth.drop(['index'], axis=1)
 # ground_truth = ground_truth.reset_index()
 # ground_truth = ground_truth.drop(['index'], axis=1)
 
-
-# Make a list for the datasets
 tables = []
 results = []
 probs = []
@@ -46,7 +41,6 @@ LBtope_weight = weights[3]/weights_sum
 raw_models = {'ABCpred': [ABCpred, ABCpred_weight], 'Bepipred2': [Bepipred2, Bepipred2_weight],
               'iBCE-EL': [iBCE_EL, iBCE_EL_weight],'LBtope': [LBtope, LBtope_weight]}
 
-# Weighted Vote Implementation
 # Multiply class values by scaled weights
 for table in raw_models.values():
     processed_table = table[0].sort_values(by=['Info_protein_id', 'Info_pos'])
@@ -65,7 +59,7 @@ final_table = final_table.iloc[:, :-1]
 results = np.transpose(np.stack(tuple(results)))
 probs = np.transpose(np.stack(tuple(probs)))
 
-# Classification
+# Weighted Vote Implementation
 for idx, r in enumerate(results):
     sum = r.sum() # Sum of the row
     if sum > 0:
@@ -83,16 +77,6 @@ ground_truth_and_pred = ground_truth_and_pred.dropna()
 # Split true class and predictions
 pred = ground_truth_and_pred.iloc[:, -1]
 ground_truth = ground_truth_and_pred.iloc[:, -2]
-
-# # Calculate accuracy
-accuracy = accuracy_score(ground_truth, pred) # Accuracy
-mcc = matthews_corrcoef(ground_truth, pred) # MCC
-f1 = f1_score(ground_truth, pred) # F1-score
-
-print('Model performance for test set')
-print('- Accuracy: %s' % accuracy)
-print('- MCC: %s' % mcc)
-print('- F1 score: %s' % f1)
 
 # Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred

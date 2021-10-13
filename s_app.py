@@ -1,13 +1,10 @@
-## SIMPLE AVERAGE PREDICTED PROBABILITY
+## SIMPLE AVERAGE PROBABILITY
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import matthews_corrcoef
-from sklearn.metrics import f1_score
 from os import listdir
 
-# Establish variables
+# Import files and establish variables
 files = listdir("./") # .csv files must be in the set directory
 # true class data is stored in a separate folder
 ground_truth = pd.read_csv('./ground_truth/training/01_training.csv')
@@ -49,7 +46,7 @@ final_table = final_table.iloc[:, :-1]
 results = np.transpose(np.stack(tuple(predictions)))
 probs = np.transpose(np.stack(tuple(probs)))
 
-# Average Predicted Probability Implementation
+# Average Probability Implementation
 divisor = probs.shape[1] # Number of predictors being used. Used to compute average
 for idx, p in enumerate(probs):
     sum = p.sum()
@@ -58,7 +55,7 @@ for idx, p in enumerate(probs):
     else:
         pred.append(1)
 
-#Merge predictions with ground_truth and remove NA
+# Merge predictions with ground_truth and remove NA
 pred = pd.DataFrame(pred)
 pred = pred.reset_index()
 pred = pred.drop(['index'], axis=1)
@@ -68,16 +65,6 @@ ground_truth_and_pred = ground_truth_and_pred.dropna()
 # Split true class and predictions
 pred = ground_truth_and_pred.iloc[:, -1]
 ground_truth_ = ground_truth_and_pred.iloc[:, -2]
-
-# Average Predicted Probability Metrics
-accuracy = accuracy_score(ground_truth_, pred) # Accuracy
-mcc = matthews_corrcoef(ground_truth_, pred) # MCC
-f1 = f1_score(ground_truth_, pred) # F1-score
-
-print('Model performance for test set')
-print('- Accuracy: %s' % accuracy)
-print('- MCC: %s' % mcc)
-print('- F1 score: %s' % f1)
 
 # Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred

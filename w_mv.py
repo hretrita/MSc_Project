@@ -78,6 +78,7 @@ ground_truth_and_pred = ground_truth_and_pred.dropna()
 pred = ground_truth_and_pred.iloc[:, -1]
 ground_truth = ground_truth_and_pred.iloc[:, -2]
 
+
 # Concatenate predictions to final_table and export csv file ready to run gather_results in R
 final_table['pred'] = pred
 final_table.to_csv('./ensemble_preds/04_Spyogenes/holdout/w_mv.csv', index=False)

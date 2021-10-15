@@ -8,8 +8,8 @@ Ensemble Methods
           Bepipred2 outputs for EBV training,
           iBCE-EL outputs for EBV training,
           LBtope outputs for EBV training
-2. Ground truth file needs to be in a separate folder and it's path entered manually to into line 13.
-3. Enter path to where the final prediction** will be saved (line 81)
+2. Ground truth file needs to be in a separate folder and it's path entered manually to into line 10.
+3. Enter path to where the final prediction** will be saved (line 76 in s_mv.py and line 71 in s_app.py)
 
 ## w_mv.py (Weighted Majority Vote) & w_app.py (Weighted Average Predicted Probability)
 
@@ -33,9 +33,9 @@ Ensemble Methods
 
 ## stacking.py (Stacking)
 
-1. All file paths entered manually into their respective variables (Lines 12-24; Lines 66-78)
-2. Comment/uncomment variables to accommodate your desired prediction (Lines 12-24; Lines 66-78)
-3. Enter path to where the final prediction** will be saved (line 117)
+1. All file paths entered manually into their respective variables (Lines 9-25; Lines 66-78)
+2. Comment/uncomment variables to accommodate your desired prediction (Lines 9-25; Lines 66-78)
+3. Enter path to where the final prediction** will be saved (line 115)
 
 ** All final predictions are saved into a table containing the columns:
     [Info_protein_id],
